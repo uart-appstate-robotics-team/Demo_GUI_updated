@@ -4,6 +4,7 @@ import numpy as np
 key = cv2. waitKey(1)
 webcam = cv2.VideoCapture(0)
 
+
 while True:
 
     check, frame = webcam.read()
@@ -18,6 +19,7 @@ while True:
         gray=cv2.cvtColor(img_, cv2.COLOR_BGR2GRAY)
         blurred=cv2.GaussianBlur(gray, (3,3), 0)
         wide = cv2.Canny(blurred, 15, 60)
+        cv2.imwrite(filename= name + '.jpg', img=wide)
         cv2.imshow("Edges", wide)
         cv2.waitKey(0)
         break
