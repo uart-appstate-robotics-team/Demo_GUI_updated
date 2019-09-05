@@ -3,9 +3,16 @@ import cv2
 from PIL import Image
 from PIL import ImageTk
 import os
+from imports.EdgePoints import edgepoints
+#from imports.uArtAPI import uart
 
 class App(Frame):
     def __init__(self, master=None):
+
+        #TODO:
+            #initialize uart object
+
+        
         Frame.__init__(self, master)
         self.master = master
         self.pack(fill =BOTH, expand = 1)
@@ -46,6 +53,19 @@ class App(Frame):
         self.nameEntry.place(x=1200, y=600)
         self.takeName = Button(self, text="Enter", command=self.getName)
         self.takeName.place(x=1210, y=635)
+
+        #Go Button
+        self.go_Button = Button(self, text="Go", command=self.clickGoButton)
+        self.go_Button.place(x=705, y=700)
+
+    def clickGoButton(self):
+        print("GO BUTTON")
+        ep = edgepoints.generate_edgepoints(self.wide)
+        print(ep)
+        #TODO:
+            #loop over ep and draw all the brush strokes
+
+
 
     def clickRetakeButton(self):
         allblack = Label(self, image=self.photoBlack)
