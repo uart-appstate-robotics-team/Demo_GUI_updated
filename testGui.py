@@ -4,29 +4,30 @@ from PIL import Image
 from PIL import ImageTk
 import os
 from imports.EdgePoints import edgepoints
-#from imports.uArtAPI import uart
+import uart
+import numpy as np
 
 class App(Frame):
     def __init__(self, master=None):
 
-        #TODO:
-            #initialize uart object
-
-        
         Frame.__init__(self, master)
         self.master = master
         self.pack(fill =BOTH, expand = 1)
         self.vid = cv2.VideoCapture(0)
         self.vid.set(cv2.CAP_PROP_FRAME_WIDTH, 640);
         self.vid.set(cv2.CAP_PROP_FRAME_HEIGHT, 360);
-        self.im =Image.open("allBlack.jpeg")
+        self.im =Image.open("allblack.jpeg")
         self.photoBlack = ImageTk.PhotoImage(self.im)
         allblack = Label(self, image=self.photoBlack)
-        allblack.config(width=640, height=354)
+        allblack.config(width=200, height=200)
         allblack.image = self.photoBlack
-        allblack.place(x=750,y=37)
+        allblack.place(x=950,y=100)
 
 
+#        lis = [True, True, False, False, False]
+#        colors = {'red':[255,0,0]}
+#
+#        self.uart = uart.uart(np.array(self.im),colors,lis)
 
         canvasFrame = Frame(width = 200, height =200)
         canvasFrame.place(in_=self, anchor="se", relx=.5, rely=.5)
@@ -61,17 +62,22 @@ class App(Frame):
     def clickGoButton(self):
         print("GO BUTTON")
         ep = edgepoints.generate_edgepoints(self.wide)
-        print(ep)
+
+        #print(ep)
         #TODO:
             #loop over ep and draw all the brush strokes
-
-
+        self.uart.swift.set_position(x=150,y=0,z=50, speed=10000, cmd = 'G0')
+        for lines in ep:
+            if len(lines) >= 2:
+                del lines[0]
+                self.uart.draw_line2(lines)
+        self.uart.swift.set_position(x=150,y=0,z=50, speed=10000, cmd = 'G0')
 
     def clickRetakeButton(self):
         allblack = Label(self, image=self.photoBlack)
         allblack.config(width=640, height=354)
         allblack.image = self.photoBlack
-        allblack.place(x=750,y=37)
+        allblack.place(x=950,y=100)
 
 
     def capturePhoto(self):
@@ -83,14 +89,19 @@ class App(Frame):
             self.img_ = cv2.imread(self.name + '.jpg')
             self.gray = cv2.cvtColor(self.img_, cv2.COLOR_BGR2GRAY)
             self.blurred = cv2.GaussianBlur(self.gray, (3,3) , 0)
-            self.wide = cv2.Canny(self.blurred, 15, 60)
+            self.wide = Image.fromarray(
+            cv2.Canny(self.blurred, 90, 100)).crop((220,140,420,340))
+            print(self.wide)
+            self.wide = cv2.cvtColor(np.array(self.wide), cv2.COLOR_BGR2RGB)
+            self.wide = cv2.cvtColor(self.wide, cv2.COLOR_BGR2GRAY)
+            print(self.wide)
             cv2.imwrite(filename=self.name+'cannyEdge.jpg', img=self.wide)
             os.remove(self.name+'.jpg')
             self.photo = ImageTk.PhotoImage(image=Image.fromarray(self.wide))
             cannyimage = Label(self, image=self.photo)
-            cannyimage.config(width=640, height=354)
+            cannyimage.config(width=200, height=200)
             cannyimage.image = self.photo
-            cannyimage.place(x=750,y=37)
+            cannyimage.place(x=950,y=100)
         else:
             self.takeName.config(highlightbackground='red')
             self.nameEntry.config(highlightbackground='red')
