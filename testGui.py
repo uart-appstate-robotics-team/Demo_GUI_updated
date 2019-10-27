@@ -8,7 +8,13 @@ import uart
 import numpy as np
 import time
 
+
+CAMNUMBER = 2
+
 class App(Frame):
+
+    draw_signature = None
+    
     def __init__(self, master=None):
 
         Frame.__init__(self, master)
@@ -16,7 +22,7 @@ class App(Frame):
         self.master = master
         self.updatePressed = False
         self.pack(fill =BOTH, expand = 1)
-        self.vid = cv2.VideoCapture(0)
+        self.vid = cv2.VideoCapture(CAMNUMBER)
         self.vid.set(cv2.CAP_PROP_FRAME_WIDTH, 640);
         self.vid.set(cv2.CAP_PROP_FRAME_HEIGHT, 360);
         self.im =Image.open("allblack.jpeg")
@@ -27,10 +33,10 @@ class App(Frame):
         allblack.place(x=950,y=100)
 
 
-#        lis = [True, True, False, False, False]
-#        colors = {'red':[255,0,0]}
-#
-#        self.uart = uart.uart(np.array(self.im),colors,lis)
+        lis = [True, True, False, False, False]
+        colors = {'red':[255,0,0]}
+
+        self.uart = uart.uart(np.array(self.im),colors,lis)
 
         canvasFrame = Frame(width = 200, height =200)
         canvasFrame.place(in_=self, anchor="se", relx=.5, rely=.5)
@@ -78,6 +84,11 @@ class App(Frame):
         self.y = Scale(self, from_= 0, to= 200, bigincrement = 5, length = 200, orient=HORIZONTAL)
         self.y.set(100)
         self.y.place(x = 626, y = 540)
+
+        #Checkbox for signature
+        self.draw_signature = BooleanVar()
+        self.signature_checkbox = Checkbutton(self, text="Signature", variable=self.draw_signature)
+        self.signature_checkbox.place(x = 1210, y = 670)
         
     def updateImage(self):
         self.updatePressed = True
@@ -129,6 +140,11 @@ class App(Frame):
                 self.uart.draw_line2(lines)
         self.uart.swift.set_position(x=150,y=0,z=50, speed=10000, cmd = 'G0')
 
+        im = cv2.imread("./signature.png", cv2.IMREAD_GRAYSCALE)
+        im = np.array(im)
+        if (self.draw_signature.get()):
+            self.uart.draw_signature(im)
+
     def clickRetakeButton(self):
         allblack = Label(self, image=self.photoBlack)
         allblack.config(width=640, height=354)
@@ -172,6 +188,7 @@ class App(Frame):
 
     def update(self):
         ret, frame = self.get_frame()
+
 
         if ret:
             self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
