@@ -9,7 +9,7 @@ import numpy as np
 import time
 
 
-CAMNUMBER = 2
+CAMNUMBER = 0
 
 class App(Frame):
 
@@ -144,6 +144,7 @@ class App(Frame):
         im = np.array(im)
         if (self.draw_signature.get()):
             self.uart.draw_signature(im)
+        self.uart.swift.set_position(x=150,y=0,z=50, speed=10000, cmd = 'G0')
 
     def clickRetakeButton(self):
         allblack = Label(self, image=self.photoBlack)
